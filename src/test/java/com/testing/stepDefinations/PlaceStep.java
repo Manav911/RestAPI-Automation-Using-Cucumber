@@ -1,11 +1,14 @@
 package com.testing.stepDefinations;
 
+import java.io.FileNotFoundException;
+import java.io.IOException;
 import java.util.ArrayList;
 
 import org.junit.runner.RunWith;
 
 import com.testing.model.AddPlace;
 import com.testing.model.Location;
+import com.testing.resources.ReUseUtils;
 import com.testing.resources.TestDataBuild;
 
 import static org.junit.Assert.*;
@@ -26,27 +29,26 @@ import io.restassured.specification.RequestSpecification;
 import io.restassured.specification.ResponseSpecification;
 
 @RunWith(Cucumber.class)
-public class PlaceStep {
+public class PlaceStep extends ReUseUtils {
 	RequestSpecification requestSpecification;
 	ResponseSpecification responseSpecification;
 	Response response;
 	TestDataBuild testDataBuild = new TestDataBuild();
 
 	@Given("Add place API payload")
-	public void add_place_api_payload() {
+	public void add_place_api_payload() throws IOException {
 
-		
-		requestSpecification = new RequestSpecBuilder().setBaseUri("https://rahulshettyacademy.com")
-				.setBody(testDataBuild.addPlacePayLoad()).setContentType(ContentType.JSON).build();
-		responseSpecification = new ResponseSpecBuilder().expectContentType(ContentType.JSON).expectStatusCode(200)
-				.build();
+		requestSpecification = given().spec(requestSpecBuilder()).body(testDataBuild.addPlacePayLoad());
 	}
 
 	@When("user calls {string} with Post http Request")
 	public void user_calls_with_post_http_request(String string) {
+
+		responseSpecification = new ResponseSpecBuilder().expectContentType(ContentType.JSON).expectStatusCode(200)
+				.build();
 		
-		response = given().spec(requestSpecification).when().post("maps/api/place/add/json").then()
-				.spec(responseSpecification).extract().response();
+		response = requestSpecification.when().post("maps/api/place/add/json").then().spec(responseSpecification)
+				.extract().response();
 
 	}
 
